@@ -11,4 +11,3 @@ signInLink.addEventListener('click', () => {
     wrapper.classList.add('animated-signup');
     wrapper.classList.remove('animated-signin');
 });
-
