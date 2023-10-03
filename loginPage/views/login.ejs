@@ -13,10 +13,10 @@
     <div class="wrapper">
         <!-- sign-up -->
         <div class="form-container sign-up">
-            <form action="/signup" method="post">
+            <form action="/register" method="POST">
                 <h2>sign up</h2>
                 <div class="form-group">
-                    <input type="text" required name="username">
+                    <input type="text" required name="name">
                     <label for="">username</label>
                     <i class="fas fa-user"></i>
                 </div>
@@ -38,7 +38,7 @@
         </div>
         <!-- sign-in -->
         <div class="form-container sign-in">
-            <form action="#">
+            <form action="/login" method="POST">
                 <h2>login</h2>
                 <div class="form-group">
                     <input type="text" required name="username">
