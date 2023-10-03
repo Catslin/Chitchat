@@ -1,14 +1,31 @@
+const mongoose = require('mongoose');
+
+// 连接 MongoDB 数据库
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/chai', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  autoIndex: true
+});
+
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
 
 const express = require('express')
 const app = express()
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
+
+// 定义用户模型
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  password: String
+});
+const User = mongoose.model('User', userSchema);
 
 const initializePassport = require('./passport-config')
 initializePassport(
@@ -23,10 +40,10 @@ app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
 app.use(flash())
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: 'mysecret',
   resave: false,
   saveUninitialized: false
-}))
+}));
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
@@ -51,18 +68,18 @@ app.get('/register', checkNotAuthenticated, (req, res) => {
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10)
-    users.push({
-      id: Date.now().toString(),
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const user = new User({
       name: req.body.name,
       email: req.body.email,
       password: hashedPassword
-    })
-    res.redirect('/login')
+    });
+    await user.save();
+    res.redirect('/login');
   } catch {
-    res.redirect('/register')
+    res.redirect('/register');
   }
-})
+});
 
 app.delete('/logout', (req, res) => {
   req.logOut()
