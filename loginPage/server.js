@@ -18,14 +18,7 @@ const passport = require('passport')
 const flash = require('express-flash')
 const session = require('express-session')
 const methodOverride = require('method-override')
-
-// 定义用户模型
-const userSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  password: String
-});
-const User = mongoose.model('User', userSchema);
+const User = require('./models/user')
 
 const initializePassport = require('./passport-config')
 initializePassport(
@@ -50,21 +43,27 @@ app.use(methodOverride('_method'))
 app.use(express.static('public'));
 
 app.get('/', checkAuthenticated, (req, res) => {
-  res.render('index.ejs', { name: req.user.name })
+  res.render('home.ejs', { name: req.session.username ? req.session.username : 'XXX' });
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
   res.render('login.ejs')
 })
+app.get('/404', checkNotAuthenticated, (req, res) => {
+  res.render('404.ejs', { name: req.session.username });
+})
+app.get('/home', checkNotAuthenticated, (req, res) => {
+  res.render('home.ejs', { name: req.session.username });
+})
 
 app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
-  successRedirect: '/',
-  failureRedirect: '/login',
+  successRedirect: '/home',
+  failureRedirect: '/404',
   failureFlash: true
 }))
 
 app.get('/register', checkNotAuthenticated, (req, res) => {
-  res.render('register.ejs')
+  res.render('home.ejs',{name: req.session.username ? "name is ok" : "error"})
 })
 
 app.post('/register', checkNotAuthenticated, async (req, res) => {
@@ -73,10 +72,12 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
     const user = new User({
       name: req.body.name,
       email: req.body.email,
-      password: hashedPassword
+      password: hashedPassword,
     });
     await user.save();
-    res.redirect('/login');
+    req.session.username = user.name
+    console.log(">> ",req.session.username);
+    res.redirect('/home');
   } catch {
     res.redirect('/register');
   }
