@@ -1,72 +1,91 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const express = require("express");
+const app = express();
+const bcrypt = require("bcryptjs");
+const passport = require("passport");
+const flash = require("express-flash");
+const session = require("express-session");
+const methodOverride = require("method-override");
+const User = require("./models/user");
+const initializePassport = require("./passport-config");
+
+app.set("view-engine", "ejs");
+app.use(express.urlencoded({ extended: false }));
+app.use(flash());
+app.use(
+  session({
+    secret: "mysecret",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(methodOverride("_method"));
+app.use(express.static("public"));
 
 // 连接 MongoDB 数据库
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/chai', {
+mongoose.connect(process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/chai", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  autoIndex: true
+  autoIndex: true,
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-}
-
-const express = require('express')
-const app = express()
-const bcrypt = require('bcryptjs')
-const passport = require('passport')
-const flash = require('express-flash')
-const session = require('express-session')
-const methodOverride = require('method-override')
-const User = require('./models/user')
-
-const initializePassport = require('./passport-config')
 initializePassport(
   passport,
-  email => users.find(user => user.email === email),
-  id => users.find(user => user.id === id)
-)
+  async (email) => {
+    try {
+      const user = await User.findOne({ email: email }); // 查询用户信息
+      return user;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  },
+  async (id) => {
+    try {
+      const user = await User.findById(id); // 查询用户信息
+      return user;
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  }
+);
 
-const users = []
+app.get("/", checkAuthenticated, (req, res) => {
+  res.render("home.ejs", {
+    name: req.session.username ? req.session.username : "XXX",
+  });
+});
 
-app.set('view-engine', 'ejs')
-app.use(express.urlencoded({ extended: false }))
-app.use(flash())
-app.use(session({
-  secret: 'mysecret',
-  resave: false,
-  saveUninitialized: false
-}));
-app.use(passport.initialize())
-app.use(passport.session())
-app.use(methodOverride('_method'))
-app.use(express.static('public'));
+app.get("/login", checkNotAuthenticated, (req, res) => {
+  res.render("login.ejs");
+});
 
-app.get('/', checkAuthenticated, (req, res) => {
-  res.render('home.ejs', { name: req.session.username ? req.session.username : 'XXX' });
-})
+app.get("/404", checkNotAuthenticated, (req, res) => {
+  res.render("404.ejs", {
+    name: req.session.username ? req.session.username : "XXX",
+  });
+});
 
-app.get('/login', checkNotAuthenticated, (req, res) => {
-  res.render('login.ejs')
-})
-app.get('/404', checkNotAuthenticated, (req, res) => {
-  res.render('404.ejs', { name: req.session.username });
-})
-app.get('/home', checkNotAuthenticated, (req, res) => {
-  res.render('home.ejs', { name: req.session.username });
-})
+app.get("/home", checkAuthenticated, (req, res) => {
+  res.render("home.ejs", {
+    name: req.session.username ? req.session.username : "XXX",
+  });
+});
 
-app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
+app.post("/login", checkNotAuthenticated, passport.authenticate('local', {
   successRedirect: '/home',
   failureRedirect: '/404',
   failureFlash: true
-}))
+}));
 
-app.get('/register', checkNotAuthenticated, (req, res) => {
-  res.render('home.ejs',{name: req.session.username ? "name is ok" : "error"})
-})
+app.get("/register", checkNotAuthenticated, (req, res) => {
+  res.render("register.ejs");
+});
 
-app.post('/register', checkNotAuthenticated, async (req, res) => {
+app.post("/register", checkNotAuthenticated, async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
     const user = new User({
@@ -75,32 +94,31 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
       password: hashedPassword,
     });
     await user.save();
-    req.session.username = user.name
-    console.log(">> ",req.session.username);
-    res.redirect('/home');
+    req.session.username = user.name;
+    res.redirect("/home");
   } catch {
-    res.redirect('/register');
+    res.redirect("/404");
   }
 });
 
-app.delete('/logout', (req, res) => {
-  req.logOut()
-  res.redirect('/login')
-})
+app.delete("/logout", (req, res) => {
+  req.logOut();
+  res.redirect("/login");
+});
 
 function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
-    return next()
+    return next();
   }
 
-  res.redirect('/login')
+  res.redirect("/login");
 }
 
 function checkNotAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
-    return res.redirect('/')
+    return res.redirect("/");
   }
-  next()
+  next();
 }
 
-app.listen(3000)
+app.listen(3000);
