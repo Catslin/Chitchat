@@ -1,13 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const flash = require("express-flash");
+const bcrypt = require('bcryptjs')
 const session = require("express-session");
 const methodOverride = require("method-override");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("./models/user");
 const loginRouter = require("./routes/login.js");
-const bcrypt = require('bcryptjs')
+const registerRouter = require("./routes/register.js");
 
 const app = express();
 
@@ -66,43 +67,12 @@ app.get("/", checkAuthenticated, (req, res) => {
     .populate("articles")
     .then((user) => {
       console.log(">>>>", user.articles);
-      res.render("index.ejs", { name: req.user.name, articles: user.articles });
+      res.render("login/index.ejs", { name: req.user.name, articles: user.articles });
     })
     .catch((err) => {
       console.log(err);
       res.redirect("/login");
     });
-});
-
-app.get("/register", checkNotAuthenticated, (req, res) => {
-  res.render("register.ejs");
-});
-
-app.post("/register", checkNotAuthenticated, async (req, res) => {
-  try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const user = new User({
-      name: req.body.name,
-      email: req.body.email,
-      password: hashedPassword,
-      articles: [
-        {
-          title: `${req.body.name} article`,
-          description: "User-added and default article display",
-        },
-        {
-          title: `${req.body.name} article`,
-          description: "User-added and default article display",
-        },
-      ],
-    });
-    await user.save();
-    res.redirect("/login");
-  } catch (error) {
-    console.log(error);
-    req.flash("error_message", "Registration failed. Please try again.");
-    res.redirect("/register");
-  }
 });
 
 app.delete("/logout", (req, res) => {
@@ -118,15 +88,9 @@ function checkAuthenticated(req, res, next) {
   res.redirect("/login");
 }
 
-function checkNotAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) {
-    return res.redirect("/");
-  }
-  next();
-}
-
-// Use login router
+// Use login and register routers
 app.use("/login", loginRouter);
+app.use("/register", registerRouter);
 
 // Start the server
 app.listen(3000, () => console.log("Server started on port 3000"));

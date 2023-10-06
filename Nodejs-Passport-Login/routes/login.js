@@ -1,10 +1,9 @@
 const express = require("express");
 const passport = require("passport");
-
 const router = express.Router();
 
 router.get("/", checkNotAuthenticated, (req, res) => {
-  res.render("login.ejs");
+  res.render("login/login.ejs");
 });
 
 router.post(
