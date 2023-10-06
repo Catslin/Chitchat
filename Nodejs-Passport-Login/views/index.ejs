@@ -1,4 +1,14 @@
 <h1>Hi <%= name %></h1>
+
 <form action="/logout?_method=DELETE" method="POST">
   <button type="submit">Log Out</button>
 </form>
+
+<% if (articles && articles.length) { %>
+  <% articles.forEach((article) => { %>
+    <h2><%= article.title %></h2>
+    <p><%= article.content %></p>
+  <% }) %>
+<% } else { %>
+  <p>No articles found.</p>
+<% } %>
