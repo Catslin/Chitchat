@@ -7,8 +7,8 @@ const userSchema = new Schema({
   password: { type: String, required: true },
   articles: [
     {
-      title: { type: String, required: true,default: "Title"},
-      description: { type: String, required: true,default: "Example of definition of article content"},
+      title: { type: String, required: true},
+      description: { type: String, required: true},
     },
   ],
 });

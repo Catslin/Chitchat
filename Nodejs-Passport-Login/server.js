@@ -108,7 +108,9 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
     });
     await user.save();
     res.redirect("/login");
-  } catch {
+  } catch (error) {
+    console.log(error);
+    req.flash("error_message", "Registration failed. Please try again.");
     res.redirect("/register");
   }
 });
