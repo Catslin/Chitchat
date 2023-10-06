@@ -1,12 +1,13 @@
 const express = require("express");
-const bcrypt = require("bcryptjs");
-const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
 const mongoose = require("mongoose");
 const flash = require("express-flash");
 const session = require("express-session");
 const methodOverride = require("method-override");
+const passport = require("passport");
+const LocalStrategy = require("passport-local").Strategy;
 const User = require("./models/user");
+const loginRouter = require("./routes/login.js");
+const bcrypt = require('bcryptjs')
 
 const app = express();
 
@@ -73,20 +74,6 @@ app.get("/", checkAuthenticated, (req, res) => {
     });
 });
 
-app.get("/login", checkNotAuthenticated, (req, res) => {
-  res.render("login.ejs");
-});
-
-app.post(
-  "/login",
-  checkNotAuthenticated,
-  passport.authenticate("local", {
-    successRedirect: "/",
-    failureRedirect: "/login",
-    failureFlash: true,
-  })
-);
-
 app.get("/register", checkNotAuthenticated, (req, res) => {
   res.render("register.ejs");
 });
@@ -103,7 +90,10 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
           title: `${req.body.name} article`,
           description: "User-added and default article display",
         },
-        { title: `${req.body.email} call`, description: "User-added and default article display" },
+        {
+          title: `${req.body.name} article`,
+          description: "User-added and default article display",
+        },
       ],
     });
     await user.save();
@@ -134,6 +124,9 @@ function checkNotAuthenticated(req, res, next) {
   }
   next();
 }
+
+// Use login router
+app.use("/login", loginRouter);
 
 // Start the server
 app.listen(3000, () => console.log("Server started on port 3000"));
