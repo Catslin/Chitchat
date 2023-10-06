@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const flash = require("express-flash");
 const session = require("express-session");
 const methodOverride = require("method-override");
+const User = require("./models/user");
 
 const app = express();
 
@@ -15,21 +16,6 @@ mongoose
   .connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Error connecting to MongoDB:", err));
-
-// User schema and model
-
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  articles: [
-    {
-      title: { type: String, required: true,default: "Title"},
-      content: { type: String, required: true,default: "Example of definition of article content"},
-    },
-  ],
-});
-const User = mongoose.model("User", userSchema);
 
 // Passport configuration
 passport.use(
@@ -112,6 +98,13 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
       name: req.body.name,
       email: req.body.email,
       password: hashedPassword,
+      articles: [
+        {
+          title: `${req.body.name} article`,
+          description: "User-added and default article display",
+        },
+        { title: `${req.body.email} call`, description: "User-added and default article display" },
+      ],
     });
     await user.save();
     res.redirect("/login");

@@ -1,14 +1,35 @@
-<h1>Hi <%= name %></h1>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <title><%= name %> >> Homepage</title>
+  </head>
 
-<form action="/logout?_method=DELETE" method="POST">
-  <button type="submit">Log Out</button>
-</form>
+  <body>
+    <h1>Hi <%= name %></h1>
 
-<% if (articles && articles.length) { %>
-  <% articles.forEach((article) => { %>
-    <h2><%= article.title %></h2>
-    <p><%= article.content %></p>
-  <% }) %>
-<% } else { %>
-  <p>No articles found.</p>
-<% } %>
+    <form action="/logout?_method=DELETE" method="POST">
+      <button type="submit">Log Out</button>
+    </form>
+
+    <% if (articles && articles.length) { %> <% articles.forEach((article)=> {
+    %>
+    <div class="card mb-3">
+      <div class="card-body">
+        <h2 class="card-title"><%= article.title %></h2>
+        <hr />
+        <p class="card-text"><%= article.description %></p>
+      </div>
+    </div>
+    <% }) %> <% } else { %>
+    <p>No articles found.</p>
+    <% } %>
+  </body>
+</html>
