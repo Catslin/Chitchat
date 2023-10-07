@@ -1,23 +1,23 @@
 const express = require("express");
+const Article = require("./models/article");
+const articleRouter = require("./routes/articles");
+const loginRouter = require("./routes/login");
+const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const flash = require("express-flash");
-const bcrypt = require('bcryptjs')
+const bcrypt = require("bcryptjs");
 const session = require("express-session");
-const methodOverride = require("method-override");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("./models/user");
-const loginRouter = require("./routes/login.js");
 const registerRouter = require("./routes/register.js");
-
 const app = express();
 
-// Connect to MongoDB
-const dbUrl = "mongodb://127.0.0.1:27017/chai"; // replace with your database URL
-mongoose
-  .connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("Error connecting to MongoDB:", err));
+mongoose.connect("mongodb://127.0.0.1:27017/chai", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+});
 
 // Passport configuration
 passport.use(
@@ -46,9 +46,10 @@ passport.deserializeUser(async (id, done) => {
   done(null, user);
 });
 
-// Middleware
-app.set("view-engine", "ejs");
+app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride("_method"));
+app.use(express.static("public"));
 app.use(flash());
 app.use(
   session({
@@ -59,15 +60,25 @@ app.use(
 );
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(methodOverride("_method"));
+
+// app.get("/articles", async (req, res) => {
+//   const articles = await Article.find().sort({ createdAt: "desc" });
+//   res.render("login/index", { articles: articles });
+// });
 
 // Routes
-app.get("/", checkAuthenticated, (req, res) => {
+app.get("/", checkAuthenticated, async (req, res) => {
+  const articles = await Article.find().sort({ createdAt: "desc" });
+  const user = await User.findUserByName(req.user.name);
+  const userId = user._id;
   User.findOne({ name: req.user.name })
     .populate("articles")
-    .then((user) => {
-      console.log(">>>>", user.articles);
-      res.render("login/index.ejs", { name: req.user.name, articles: user.articles });
+    .then(() => {
+      res.render("articles/index.ejs", {
+        name: req.user.name,
+        articles: articles,
+        id: userId
+      });
     })
     .catch((err) => {
       console.log(err);
@@ -91,6 +102,6 @@ function checkAuthenticated(req, res, next) {
 // Use login and register routers
 app.use("/login", loginRouter);
 app.use("/register", registerRouter);
+app.use("/articles", articleRouter);
 
-// Start the server
-app.listen(3000, () => console.log("Server started on port 3000"));
+app.listen(5000);

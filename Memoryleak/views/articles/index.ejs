@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Blog</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="mb-4"> <%= name %> Articles</h1>
+      <h1>ID :: <%= id %></h1>
+      <div class="d-flex align-items-center" style="gap: 10px">
+        <a href="/articles/new" class="btn btn-success">New Article</a>
+        <form action="/logout?_method=DELETE" method="POST">
+          <button type="submit" class="btn btn-danger">Log Out</button>
+        </form>
+      </div>
+
+      <!--  -->
+      <% articles.forEach(article => { %>
+      <a href="articles/<%= article.slug %>">
+        <div
+          class="card w-580 car-img2"
+          style="
+            margin-top: 20px;
+            background-size: cover;
+            background-position: left;
+            background-position: left;
+            background-image: url('<%= article.image %>');
+          "
+        >
+          <div class="card-body">
+            <div class="row" style="margin-top: 10px">
+              <div class="col-2 d-none d-md-block">
+                <h5 class="card-title">
+                  <%= article.createdAt.toLocaleDateString() %>
+                </h5>
+              </div>
+              <div class="col-1">
+                <div
+                  style="
+                    border-left: 2px solid black;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                  "
+                ></div>
+              </div>
+              <div class="col-9">
+                <h5 class="card-title"><%= article.title %></h5>
+                <p class="card-text"><%= article.description %>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </a>
+      <% }) %>
+    </div>
+  </body>
+</html>
