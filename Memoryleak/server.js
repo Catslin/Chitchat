@@ -22,9 +22,9 @@ mongoose.connect("mongodb://127.0.0.1:27017/chai", {
 // Passport configuration
 passport.use(
   new LocalStrategy(
-    { usernameField: "email" },
-    async (email, password, done) => {
-      const user = await User.findOne({ email: email });
+    { usernameField: "name" },
+    async (name, password, done) => {
+      const user = await User.findOne({ name: name });
       if (!user) {
         return done(null, false, { message: "No user with that email" });
       }

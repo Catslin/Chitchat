@@ -1,16 +1,69 @@
-<h1>Login</h1>
-<% if (messages.error) { %>
-  <%= messages.error %>
-<% } %>
-<form action="/login" method="POST">
-  <div>
-    <label for="email">Email</label>
-    <input type="email" id="email" name="email" required>
-  </div>
-  <div>
-    <label for="password">Password</label>
-    <input type="password" id="password" name="password" required>
-  </div>
-  <button type="submit">Login</button>
-</form>
-<a href="/register">Register</a>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <title>Sign in & Sign up</title>
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- sign-up -->
+        <div class="form-container sign-up">
+            <form action="/register" method="POST">
+                <h2>sign up</h2>
+                <div class="form-group">
+                    <input type="name" required name="name">
+                    <label for="name">username</label>
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="form-group">
+                    <input type="email" required name="email">
+                    <label for="email">email</label>
+                    <i class="fas fa-at"></i>
+                </div>
+                <div class="form-group">
+                    <input type="password" required name="password">
+                    <label for="password">password</label>
+                    <i class="fas fa-lock"></i>
+                </div>
+                <button type="submit" class="btn">sign up</button>
+                <div class="link">
+                    <p>You already have an account?<a href="#" class="signin-link"> sign in</a></p>
+                </div>
+            </form>
+        </div>
+        <!-- sign-in -->
+        <div class="form-container sign-in">
+            <form action="/login" method="POST">
+                <h2>login</h2>
+                <div class="form-group">
+                    <input type="text" required name="name">
+                    <i class="fas fa-user"></i>
+                    <label for="name">username</label>
+                </div>
+                <div class="form-group">
+                    <input type="password" required name="password">
+                    <i class="fas fa-lock"></i>
+                    <label for="password">password</label>
+                </div>
+                <div class="forgot-pass">
+                    <div class="link">
+                    <a href="#" class="forgot-link">forgot password?</a>
+                    </div>
+                </div>
+                <button type="submit" class="btn">login</button>
+                <div class="link">
+                    <p>Don't have an account?<a href="#" class="signup-link"> sign up</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://kit.fontawesome.com/9e5ba2e3f5.js" crossorigin="anonymous"></script>
+    <script src="js/login.js"></script>
+</body>
+
+</html>
