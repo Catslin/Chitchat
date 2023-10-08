@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const Articles = require("./article");
+const Article = require('./article')
 
 const userSchema = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  articles: [{ type: Schema.Types.ObjectId, ref: "Articles" }],
+  articles: [{ type: Schema.Types.ObjectId, ref: "Article" }],
 });
 
 userSchema.statics.findUserByName = async function (name) {

@@ -68,16 +68,17 @@ app.use(passport.session());
 
 // Routes
 app.get("/", checkAuthenticated, async (req, res) => {
-  const articles = await Article.find().sort({ createdAt: "desc" });
   const user = await User.findUserByName(req.user.name);
-  const userId = user._id;
+  const articleIds = user.articles;
+  const articles = await Article.find({ _id: { $in: articleIds } }).sort({ createdAt: "desc" });
+
   User.findOne({ name: req.user.name })
     .populate("articles")
     .then(() => {
       res.render("articles/index.ejs", {
         name: req.user.name,
         articles: articles,
-        id: userId
+        id: user._id
       });
     })
     .catch((err) => {

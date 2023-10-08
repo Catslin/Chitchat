@@ -1,51 +1,66 @@
-const express = require('express')
-const Article = require('./../models/article')
-const router = express.Router()
+const express = require("express");
+const Article = require("./../models/article");
+const router = express.Router();
 
-router.get('/new', (req, res) => {
-  res.render('articles/new', { article: new Article() })
-})
+router.get("/new", (req, res) => {
+  res.render("articles/new", { article: new Article() });
+});
 
-router.get('/edit/:id', async (req, res) => {
-  const article = await Article.findById(req.params.id)
-  res.render('articles/edit', { article: article })
-})
+router.get("/edit/:id", async (req, res) => {
+  const article = await Article.findById(req.params.id);
+  res.render("articles/edit", { article: article });
+});
 
-router.get('/:slug', async (req, res) => {
-  const article = await Article.findOne({ slug: req.params.slug })
-  if (article == null) res.redirect('/')
-  res.render('articles/show', { article: article })
-})
+router.get("/:slug", async (req, res) => {
+  const article = await Article.findOne({ slug: req.params.slug });
+  if (article == null) res.redirect("/");
+  res.render("articles/show", { article: article });
+});
 
-router.post('/', async (req, res, next) => {
-  req.article = new Article()
-  next()
-}, saveArticleAndRedirect('new'))
+router.post(
+  "/",
+  async (req, res, next) => {
+    req.article = new Article();
+    next();
+  },
+  saveArticleAndRedirect("new")
+);
 
-router.put('/:id', async (req, res, next) => {
-  req.article = await Article.findById(req.params.id)
-  next()
-}, saveArticleAndRedirect('edit'))
+router.put(
+  "/:id",
+  async (req, res, next) => {
+    req.article = await Article.findById(req.params.id);
+    next();
+  },
+  saveArticleAndRedirect("edit")
+);
 
-router.delete('/:id', async (req, res) => {
-  await Article.findByIdAndDelete(req.params.id)
-  res.redirect('/')
-})
+router.delete("/:id", async (req, res) => {
+  await Article.findByIdAndDelete(req.params.id);
+  res.redirect("/");
+});
 
 function saveArticleAndRedirect(path) {
   return async (req, res) => {
-    let article = req.article
-    article.title = req.body.title
-    article.description = req.body.description
-    article.markdown = req.body.markdown
-    article.image = req.body.image
+    let article = req.article;
+    article.title = req.body.title;
+    article.description = req.body.description;
+    article.markdown = req.body.markdown;
+    article.image = req.body.image;
     try {
-      article = await article.save()
-      res.redirect(`/articles/${article.slug}`)
+      article = await article.save();
+      console.log("articleID >>", article._id);
+      // 获取当前登录用户
+      const currentUser = req.user;
+      console.log("loginUser >>",currentUser);
+      // 将文章ID保存到用户的articles里面
+      currentUser.articles.push(article._id);
+      await currentUser.save();
+      res.redirect(`/articles/${article.slug}`);
     } catch (e) {
-      res.render(`articles/${path}`, { article: article })
+      res.render(`articles/${path}`, { article: article });
     }
-  }
+  };
 }
 
-module.exports = router
+module.exports = router;

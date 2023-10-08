@@ -15,16 +15,6 @@ router.post("/", checkNotAuthenticated, async (req, res) => {
       name: req.body.name,
       email: req.body.email,
       password: hashedPassword,
-      articles: [
-        {
-          title: `${req.body.name} article ${new Date().toLocaleString()}`,
-          description: "User-added and default article display",
-        },
-        {
-          title: `${req.body.email} call ${new Date().toLocaleString()}`,
-          description: "User-added and default article display",
-        },
-      ],
     });
     await user.save();
     res.redirect("/login");
